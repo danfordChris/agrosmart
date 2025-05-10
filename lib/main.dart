@@ -1,6 +1,10 @@
+import 'package:agrosmart/provider/auth_provider.dart';
 import 'package:agrosmart/provider/cart_provider.dart';
+import 'package:agrosmart/provider/disease_detection_provider.dart';
 import 'package:agrosmart/provider/weather_provider.dart';
+import 'package:agrosmart/screen/Auth/login_screen.dart';
 import 'package:agrosmart/screen/splash_screen.dart';
+import 'package:agrosmart/services/crop_diseases_service.dart';
 import 'package:agrosmart/weather/location_service.dart';
 import 'package:agrosmart/weather/weather_screen.dart';
 import 'package:agrosmart/weather/weather_service.dart';
@@ -20,19 +24,22 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(
+          create: (_) => DiseaseDetectionProvider(CropDetectionService()),
+        ),
+        ChangeNotifierProvider(
           create:
               (_) => WeatherProvider(
                 weatherService: WeatherService(),
                 locationService: LocationService(),
               ),
         ),
-
         ChangeNotifierProvider(create: (_) => CartProvider()),
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
       ],
       child: MaterialApp(
-        title: 'Flutter Demo',
+        title: 'Agrosmart',
         theme: ThemeData(),
-        home: SplashScreen(),
+        home: LoginScreen(),
 
         // WeatherScreen(
         //   weatherService: WeatherService(),

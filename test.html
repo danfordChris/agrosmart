@@ -1,0 +1,100 @@
+check nlivyopost hapa
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pick a Location - Crop Recommendation</title>
+    <style>
+        #map {
+            height: 400px;
+            width: 100%;
+        }
+        form {
+            margin-top: 20px;
+        }
+    </style>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyANcz1bAZ8ZFZLHZIEhkb1lZIk45eGNOwQ"></script>
+</head>
+<body>
+
+<h2>Click on the Map to Select a Location</h2>
+<div id="map"></div>
+
+<form id="locationForm">
+    <label>Latitude: <input type="text" id="latitude" name="latitude" readonly></label><br><br>
+    <label>Longitude: <input type="text" id="longitude" name="longitude" readonly></label><br><br>
+    <button type="submit">Get Crop Recommendations</button>
+</form>
+
+<div id="result" style="margin-top:20px;"></div>
+
+<script>
+    let map;
+    let marker;
+
+    function initMap() {
+        const defaultLocation = { lat: -6.1630, lng: 35.7516 }; // Dodoma, Tanzania
+
+        map = new google.maps.Map(document.getElementById('map'), {
+            center: defaultLocation,
+            zoom: 7
+        });
+
+        map.addListener('click', function (event) {
+            placeMarker(event.latLng);
+        });
+    }
+
+    function placeMarker(location) {
+        if (marker) {
+            marker.setPosition(location);
+        } else {
+            marker = new google.maps.Marker({
+                position: location,
+                map: map
+            });
+        }
+
+        document.getElementById('latitude').value = location.lat();
+        document.getElementById('longitude').value = location.lng();
+    }
+
+    window.onload = initMap;
+
+    document.getElementById('locationForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const latitude = document.getElementById('latitude').value;
+        const longitude = document.getElementById('longitude').value;
+
+        if (!latitude || !longitude) {
+            alert('Please select a location by clicking on the map.');
+            return;
+        }
+
+        const payload = {
+            latitude: parseFloat(latitude),
+            longitude: parseFloat(longitude)
+        };
+
+        try {
+            const response = await fetch('https://a331-197-186-15-155.ngrok-free.app/recommend/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json();
+            document.getElementById('result').innerText = JSON.stringify(data, null, 2);
+
+        } catch (error) {
+            console.error('Error:', error);
+            document.getElementById('result').innerText = 'Error contacting server.';
+        }
+    });
+</script>
+
+</body>
+</html>

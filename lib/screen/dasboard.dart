@@ -1,8 +1,12 @@
 import 'package:agrosmart/Constants/app_colors.dart';
 import 'package:agrosmart/components/expanded_button.dart';
 import 'package:agrosmart/provider/weather_provider.dart';
+import 'package:agrosmart/screen/arlert_screen.dart';
 import 'package:agrosmart/screen/chartbot_screen.dart';
+import 'package:agrosmart/screen/disease_detection/camera_screen.dart';
+import 'package:agrosmart/screen/disease_detection/crop_disease_scanner_screen.dart';
 import 'package:agrosmart/screen/market_place.dart';
+import 'package:agrosmart/screen/user_account_screen.dart';
 import 'package:agrosmart/screen/weather_screen.dart';
 import 'package:agrosmart/weather/weather_screen.dart';
 import 'package:agrosmart/weather/weather_service.dart';
@@ -56,6 +60,7 @@ class _AgroSmartHomeState extends State<AgroSmartHome> {
       // const MessagesPage(),
       AgriChatbotScreen(),
       const AlertsPage(),
+      // CameraScreen(),
     ];
   }
 
@@ -97,9 +102,20 @@ class _AgroSmartHomeState extends State<AgroSmartHome> {
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 16.0),
-            child: CircleAvatar(
-              backgroundColor: Colors.grey.shade300,
-              child: const Icon(Icons.person, color: Colors.black),
+            child: GestureDetector(
+              onTap: () {
+                // Handle profile icon tap
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const UserAccountScreen(),
+                  ),
+                );
+              },
+              child: CircleAvatar(
+                backgroundColor: Colors.white,
+                child: Icon(Icons.person, color: AppColors.primary),
+              ),
             ),
           ),
         ],
@@ -192,7 +208,6 @@ class _AgroSmartHomeState extends State<AgroSmartHome> {
   }
 }
 
-// Home Page Widget with WeatherCard
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
@@ -208,7 +223,7 @@ class HomePage extends StatelessWidget {
             Consumer<WeatherProvider>(
               builder: (context, provider, child) {
                 if (provider.isLoading) {
-                  return const SizedBox.shrink();
+                  return SizedBox.shrink();
                 } else if (provider.errorMessage != null) {
                   return Column(
                     children: [
@@ -237,7 +252,7 @@ class HomePage extends StatelessWidget {
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
-            _buildFeatureCards(),
+            _buildFeatureCards(context),
           ],
         ),
       ),
@@ -249,7 +264,7 @@ class HomePage extends StatelessWidget {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => MarketplaceScreen()),
+          MaterialPageRoute(builder: (context) => const MarketplaceScreen()),
         );
       },
       borderRadius: BorderRadius.circular(16),
@@ -298,21 +313,25 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildFeatureCards() {
+  Widget _buildFeatureCards(BuildContext context) {
     return Column(
       children: [
         Row(
           children: [
             _buildFeatureCard(
+              context,
               Icons.health_and_safety,
               "Tambua ugonjwa unaoshambulia",
               "Tambua Magonjwa",
+              const CameraScreen(),
             ),
             const SizedBox(width: 12),
             _buildFeatureCard(
+              context,
               Icons.agriculture,
               "Pata ushauri wa zao la kilimo",
               "Ushauri wa mazao",
+              const AgriChatbotScreen(),
             ),
           ],
         ),
@@ -320,15 +339,19 @@ class HomePage extends StatelessWidget {
         Row(
           children: [
             _buildFeatureCard(
+              context,
               Icons.insights,
               "Fuatilia mavuno yako",
               "Fuatilia mavuno",
+              const MarketplaceScreen(),
             ),
             const SizedBox(width: 12),
             _buildFeatureCard(
+              context,
               Icons.water_drop,
               "Usimamizi wa umwagiliaji",
               "Usimamizi wa maji",
+              const WeatherScreen(),
             ),
           ],
         ),
@@ -336,119 +359,75 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildFeatureCard(IconData icon, String title, String buttonText) {
+  Widget _buildFeatureCard(
+    BuildContext context,
+    IconData icon,
+    String title,
+    String buttonText,
+    Widget destination,
+  ) {
     return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        margin: const EdgeInsets.only(bottom: 12),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          color: Colors.green.shade50,
-          border: Border.all(color: AppColors.secondary, width: 1),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.green.withAlpha(12),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.green.shade100,
-                shape: BoxShape.circle,
+      child: InkWell(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => destination),
+          );
+        },
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          margin: const EdgeInsets.only(bottom: 12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            color: Colors.green.shade50,
+            border: Border.all(color: AppColors.secondary, width: 1),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.green.withAlpha(12),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
               ),
-              child: Icon(icon, size: 28, color: Colors.green.shade800),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: Colors.green.shade900,
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.green.shade100,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, size: 28, color: Colors.green.shade800),
               ),
-            ),
-            const SizedBox(height: 12),
-            ExpandedButton(
-              onPressed: () {
-                // Handle button press
-              },
-              text: buttonText,
-              backgroundColor: Colors.green.shade600,
-              foregroundColor: Colors.white,
-              borderRadius: 12,
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              textStyle: const TextStyle(fontSize: 12),
-            ),
-          ],
+              const SizedBox(height: 12),
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.green.shade900,
+                ),
+              ),
+              const SizedBox(height: 12),
+              ExpandedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => destination),
+                  );
+                },
+                text: buttonText,
+                backgroundColor: Colors.green.shade600,
+                foregroundColor: Colors.white,
+                borderRadius: 12,
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                textStyle: const TextStyle(fontSize: 12),
+              ),
+            ],
+          ),
         ),
-      ),
-    );
-  }
-}
-
-// Placeholder pages for other navigation items
-class MessagesPage extends StatelessWidget {
-  const MessagesPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.message, size: 60, color: Colors.green.shade700),
-          const SizedBox(height: 16),
-          Text(
-            'Messages Page',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.green.shade900,
-            ),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            'View your conversations',
-            style: TextStyle(fontSize: 16, color: Colors.grey),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class AlertsPage extends StatelessWidget {
-  const AlertsPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.notifications, size: 60, color: Colors.green.shade700),
-          const SizedBox(height: 16),
-          Text(
-            'Alerts Page',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.green.shade900,
-            ),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            'View weather and crop alerts',
-            style: TextStyle(fontSize: 16, color: Colors.grey),
-          ),
-        ],
       ),
     );
   }
