@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 
+import '../services/crop_diseases_service.dart';
+
 class WeatherProvider extends ChangeNotifier {
   final WeatherService _weatherService;
   final LocationService _locationService;
@@ -39,6 +41,14 @@ class WeatherProvider extends ChangeNotifier {
           position.latitude,
           position.longitude,
         );
+
+        final payload = {
+          "latitude": position.latitude,
+          "longitude": position.longitude,
+        };
+
+        //await cropPredictionService.getpredictedCrops(payload);
+
         _setWeatherData(weather);
       } else {
         _setError('Location permission denied or unavailable');
@@ -69,6 +79,9 @@ class WeatherProvider extends ChangeNotifier {
         headingAccuracy: 0,
       );
       _setWeatherData(weather);
+      final payload = {"latitude": city.lat, "longitude": city.lon};
+
+      //await cropPredictionService.getpredictedCrops(payload);
     } catch (e) {
       _setError('Failed to get city weather: $e');
     }
@@ -95,6 +108,12 @@ class WeatherProvider extends ChangeNotifier {
         headingAccuracy: 0,
       );
       _setWeatherData(weather);
+      final payload = {
+        "latitude": position.latitude,
+        "longitude": position.longitude,
+      };
+
+      //await cropPredictionService.getpredictedCrops(payload);
     } catch (e) {
       _setError('Failed to get weather for selected location: $e');
     }
@@ -109,7 +128,7 @@ class WeatherProvider extends ChangeNotifier {
     }
   }
 
-  void updatePosition(LatLng position) {
+  Future<void> updatePosition(LatLng position) async {
     _currentPosition = Position(
       latitude: position.latitude,
       longitude: position.longitude,
@@ -124,6 +143,12 @@ class WeatherProvider extends ChangeNotifier {
     );
     notifyListeners();
     fetchWeatherByLatLng(position);
+    final payload = {
+      "latitude": position.latitude,
+      "longitude": position.longitude,
+    };
+
+    //await cropPredictionService.getpredictedCrops(payload);
   }
 
   void _setLoading(bool value) {

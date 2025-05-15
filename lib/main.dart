@@ -1,5 +1,6 @@
 import 'package:agrosmart/provider/auth_provider.dart';
 import 'package:agrosmart/provider/cart_provider.dart';
+import 'package:agrosmart/provider/crop_prediction_provider.dart';
 import 'package:agrosmart/provider/disease_detection_provider.dart';
 import 'package:agrosmart/provider/weather_provider.dart';
 import 'package:agrosmart/screen/Auth/login_screen.dart';
@@ -23,6 +24,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => CropPredictionProvider()),
         ChangeNotifierProvider(
           create: (_) => DiseaseDetectionProvider(CropDetectionService()),
         ),

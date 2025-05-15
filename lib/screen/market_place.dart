@@ -17,6 +17,9 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
 
   // Sample products data
   final List<CropProduct> _products = [
+    // list from the predicted crops
+
+
     CropProduct(
       id: '1',
       name: 'Mchele',
