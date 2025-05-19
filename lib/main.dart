@@ -31,6 +31,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create:
               (_) => WeatherProvider(
+                cropPredictionService: CropPredictionService(),
                 weatherService: WeatherService(),
                 locationService: LocationService(),
               ),
