@@ -1,6 +1,7 @@
 import 'package:agrosmart/Constants/app_colors.dart';
 import 'package:agrosmart/components/expanded_button.dart';
 import 'package:agrosmart/provider/weather_provider.dart';
+import 'package:agrosmart/screen/Auth/login_screen.dart';
 import 'package:agrosmart/screen/arlert_screen.dart';
 import 'package:agrosmart/screen/chartbot_screen.dart';
 import 'package:agrosmart/screen/disease_detection/camera_screen.dart';
@@ -21,21 +22,9 @@ class Dashboard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(
-          create:
-              (_) => WeatherProvider(
-                cropPredictionService: CropPredictionService(),
-                weatherService: WeatherService(),
-                locationService: LocationService(),
-              ),
-        ),
-      ],
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: AgroSmartHome(),
-      ),
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: AgroSmartHome(),
     );
   }
 }
@@ -75,10 +64,10 @@ class _AgroSmartHomeState extends State<AgroSmartHome> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.pureWhite,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        surfaceTintColor: Colors.white,
+        backgroundColor: AppColors.pureWhite,
+        surfaceTintColor: AppColors.pureWhite,
         elevation: 0,
         title: Row(
           mainAxisSize: MainAxisSize.min,
@@ -88,7 +77,7 @@ class _AgroSmartHomeState extends State<AgroSmartHome> {
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: Colors.black,
+                color: AppColors.dark,
               ),
             ),
             Text(
@@ -107,15 +96,19 @@ class _AgroSmartHomeState extends State<AgroSmartHome> {
             child: GestureDetector(
               onTap: () {
                 // Handle profile icon tap
+                // Navigator.push(
+                //   context,
+                //   MaterialPageRoute(
+                //     builder: (context) => const UserAccountScreen(),
+                //   ),
+                // );
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => const UserAccountScreen(),
-                  ),
+                  MaterialPageRoute(builder: (context) => LoginScreen()),
                 );
               },
               child: CircleAvatar(
-                backgroundColor: Colors.white,
+                backgroundColor: AppColors.pureWhite,
                 child: Icon(Icons.person, color: AppColors.primary),
               ),
             ),
@@ -132,16 +125,16 @@ class _AgroSmartHomeState extends State<AgroSmartHome> {
       decoration: BoxDecoration(
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withAlpha(25),
+            color: AppColors.mediumGrey.withAlpha(25),
             blurRadius: 10,
             offset: const Offset(0, -5),
           ),
         ],
       ),
       child: BottomNavigationBar(
-        backgroundColor: Colors.white,
-        selectedItemColor: Colors.green.shade700,
-        unselectedItemColor: Colors.grey.shade500,
+        backgroundColor: AppColors.pureWhite,
+        selectedItemColor: AppColors.greenMedium,
+        unselectedItemColor: AppColors.darkGrey,
         selectedLabelStyle: const TextStyle(fontSize: 10),
         unselectedLabelStyle: const TextStyle(fontSize: 10),
         type: BottomNavigationBarType.fixed,
@@ -154,8 +147,8 @@ class _AgroSmartHomeState extends State<AgroSmartHome> {
               decoration: BoxDecoration(
                 color:
                     _selectedIndex == 0
-                        ? Colors.green.shade100
-                        : Colors.transparent,
+                        ? AppColors.secondary
+                        : AppColors.transparent,
                 shape: BoxShape.circle,
               ),
               child: const Icon(Icons.home, size: 20),
@@ -168,8 +161,8 @@ class _AgroSmartHomeState extends State<AgroSmartHome> {
               decoration: BoxDecoration(
                 color:
                     _selectedIndex == 1
-                        ? Colors.green.shade100
-                        : Colors.transparent,
+                        ? AppColors.secondary
+                        : AppColors.transparent,
                 shape: BoxShape.circle,
               ),
               child: const Icon(Icons.place, size: 20),
@@ -182,8 +175,8 @@ class _AgroSmartHomeState extends State<AgroSmartHome> {
               decoration: BoxDecoration(
                 color:
                     _selectedIndex == 2
-                        ? Colors.green.shade100
-                        : Colors.transparent,
+                        ? AppColors.secondary
+                        : AppColors.transparent,
                 shape: BoxShape.circle,
               ),
               child: const Icon(Icons.message, size: 20),
@@ -196,8 +189,8 @@ class _AgroSmartHomeState extends State<AgroSmartHome> {
               decoration: BoxDecoration(
                 color:
                     _selectedIndex == 3
-                        ? Colors.green.shade100
-                        : Colors.transparent,
+                        ? AppColors.secondary
+                        : AppColors.transparent,
                 shape: BoxShape.circle,
               ),
               child: const Icon(Icons.notifications, size: 20),
@@ -299,7 +292,7 @@ class HomePage extends StatelessWidget {
                 ),
                 const SizedBox(width: 12),
                 Text(
-                  "Ingia Sokoni",
+                  "Go to Market",
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -323,16 +316,16 @@ class HomePage extends StatelessWidget {
             _buildFeatureCard(
               context,
               Icons.health_and_safety,
-              "Tambua ugonjwa unaoshambulia",
-              "Tambua Magonjwa",
+              "Identify attacking crop diseases",
+              "Detect Diseases",
               const CameraScreen(),
             ),
             const SizedBox(width: 12),
             _buildFeatureCard(
               context,
               Icons.agriculture,
-              "Pata ushauri wa zao la kilimo",
-              "Ushauri wa mazao",
+              "Get crop cultivation advice",
+              "Crop Advice",
               const AgriChatbotScreen(),
             ),
           ],
@@ -343,16 +336,16 @@ class HomePage extends StatelessWidget {
             _buildFeatureCard(
               context,
               Icons.insights,
-              "Fuatilia mavuno yako",
-              "Fuatilia mavuno",
+              "Track your harvest",
+              "Track Harvest",
               const MarketplaceScreen(),
             ),
             const SizedBox(width: 12),
             _buildFeatureCard(
               context,
               Icons.book_sharp,
-              "Jifunze zaid juu ya kilimo",
-              "jifunze sasa",
+              "Learn more about farming",
+              "Learn Now",
               const WeatherScreen(),
             ),
           ],

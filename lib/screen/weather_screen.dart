@@ -1,9 +1,12 @@
+import 'package:agrosmart/core/widgets/expanded_button.dart';
 import 'package:agrosmart/provider/weather_provider.dart';
+import 'package:agrosmart/provider/crop_prediction_provider.dart';
 import 'package:agrosmart/weather/city_search_field.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:agrosmart/Constants/app_colors.dart';
 
 class WeatherScreen extends StatefulWidget {
   const WeatherScreen({super.key});
@@ -16,55 +19,109 @@ class _WeatherScreenState extends State<WeatherScreen> {
   late GoogleMapController _mapController;
   bool _mapExpanded = false;
   bool _isMapReady = false;
+  List<Map<String, dynamic>> cropSuggestions = [];
 
-  // Sample crop data - in a real app you would fetch this from a service or provider
-  final List<Map<String, dynamic>> cropSuggestions = [
-    {
-      'name': 'Maize (Corn)',
-      'description':
-          'Thrives in warm weather. Requires consistent moisture and full sun exposure.',
-      'idealTemperature': '20°C - 30°C',
-      'imageUrl': 'assets/images/maize.png',
-      'suitability': 'High',
-    },
-    {
-      'name': 'Rice',
-      'description':
-          'Requires abundant water and warm temperatures. Ideal for lowland areas.',
-      'idealTemperature': '20°C - 35°C',
-      'imageUrl': 'assets/images/rice.png',
-      'suitability': 'Medium',
-    },
-    {
-      'name': 'Wheat',
-      'description':
-          'Cool-season crop that needs moderate temperatures and well-drained soil.',
-      'idealTemperature': '15°C - 24°C',
-      'imageUrl': 'assets/images/wheat.png',
-      'suitability': 'Low',
-    },
-    {
-      'name': 'Soybeans',
-      'description':
-          'Grows well in warm climates with well-drained soils. Nitrogen-fixing crop.',
-      'idealTemperature': '20°C - 30°C',
-      'imageUrl': 'assets/images/soybeans.png',
-      'suitability': 'High',
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    cropSuggestions = _getDefaultCropSuggestions();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final cropProvider = Provider.of<CropPredictionProvider>(
+        context,
+        listen: false,
+      );
+      _updateCropSuggestions(cropProvider);
+      cropProvider.addListener(_onCropProviderChanged);
+    });
+  }
 
   @override
   void dispose() {
+    final cropProvider = Provider.of<CropPredictionProvider>(
+      context,
+      listen: false,
+    );
+    cropProvider.removeListener(_onCropProviderChanged);
     if (_isMapReady) {
       _mapController.dispose();
     }
     super.dispose();
   }
 
+  void _onCropProviderChanged() {
+    final cropProvider = Provider.of<CropPredictionProvider>(
+      context,
+      listen: false,
+    );
+    _updateCropSuggestions(cropProvider);
+  }
+
+  List<Map<String, dynamic>> _getDefaultCropSuggestions() {
+    return [
+      {
+        'name': 'Select a location',
+        'description': 'Select a location to get crop recommendations.',
+        'idealTemperature': 'N/A',
+        'imageUrl': 'assets/images/maize.png',
+        'suitability': 'Low',
+      },
+    ];
+  }
+
+  void _updateCropSuggestions(CropPredictionProvider cropProvider) {
+    if (!mounted) return;
+
+    setState(() {
+      if (cropProvider.isPredictionAvailable &&
+          cropProvider.predictedCrop != null) {
+        cropSuggestions = [
+          {
+            'name': cropProvider.predictedCrop!,
+            'description':
+                cropProvider.currentPrediction['explanation'] ??
+                'Recommended crop based on soil and weather conditions.',
+            'idealTemperature':
+                '${cropProvider.temperature?.toStringAsFixed(1) ?? "N/A"}°C',
+            'imageUrl': 'assets/images/maize.png',
+            'suitability': 'High',
+          },
+        ];
+
+        if (cropProvider.soilProperties.isNotEmpty) {
+          if (cropProvider.soilPH != null && cropProvider.soilPH! > 6.0) {
+            cropSuggestions.add({
+              'name': 'Rice',
+              'description':
+                  'Requires abundant water and warm temperatures. Ideal for lowland areas.',
+              'idealTemperature': '20°C - 35°C',
+              'imageUrl': 'assets/images/rice.png',
+              'suitability': 'Medium',
+            });
+          }
+
+          if (cropProvider.nitrogenLevel != null &&
+              cropProvider.nitrogenLevel! > 0.3) {
+            cropSuggestions.add({
+              'name': 'Wheat',
+              'description':
+                  'Cool-season crop that needs moderate temperatures and well-drained soil.',
+              'idealTemperature': '15°C - 24°C',
+              'imageUrl': 'assets/images/wheat.png',
+              'suitability': 'Medium',
+            });
+          }
+        }
+      } else {
+        cropSuggestions = _getDefaultCropSuggestions();
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.pureWhite,
       body: Consumer<WeatherProvider>(
         builder: (context, provider, child) {
           return LayoutBuilder(
@@ -91,339 +148,8 @@ class _WeatherScreenState extends State<WeatherScreen> {
                       ),
                       const SizedBox(height: 16),
 
-                      // Weather Info
-                      if (provider.isLoading)
-                        SizedBox(
-                          height: constraints.maxHeight * 0.7,
-                          child: const Center(
-                            child: CircularProgressIndicator(),
-                          ),
-                        )
-                      else if (provider.errorMessage != null)
-                        SizedBox(
-                          height: constraints.maxHeight * 0.7,
-                          child: Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  provider.errorMessage!,
-                                  style: const TextStyle(color: Colors.red),
-                                ),
-                                TextButton(
-                                  onPressed: () {
-                                    provider.fetchWeatherByLocation();
-                                  },
-                                  child: const Text('Retry'),
-                                ),
-                              ],
-                            ),
-                          ),
-                        )
-                      else if (provider.weatherData != null) ...[
-                        // Weather Summary
-                        Card(
-                          elevation: 2,
-                          margin: const EdgeInsets.only(bottom: 16),
-                          child: Container(
-                            color: Colors.white,
-                            child: Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Column(
-                                children: [
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            DateFormat('EEE, MMM d').format(
-                                              provider.weatherData!.date,
-                                            ),
-                                            style: const TextStyle(
-                                              color: Colors.grey,
-                                              fontSize: 14,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 4),
-                                          // Text(
-                                          //   provider.weatherData!.locationName,
-                                          //   style: const TextStyle(
-                                          //     fontSize: 18,
-                                          //     fontWeight: FontWeight.bold,
-                                          //   ),
-                                          // ),
-                                        ],
-                                      ),
-                                      Row(
-                                        children: [
-                                          Text(
-                                            '${((provider.weatherData!.temperature * 9 / 5) + 32).toStringAsFixed(0)}°',
-                                            style: const TextStyle(
-                                              fontSize: 36,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                          const SizedBox(width: 8),
-                                          Icon(
-                                            _getWeatherIcon(
-                                              provider
-                                                  .weatherData!
-                                                  .mainCondition,
-                                            ),
-                                            size: 40,
-                                            color: Colors.orange,
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    provider.weatherData!.mainCondition,
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-
-                        // Weather Details Grid
-                        GridView.count(
-                          crossAxisCount: 3,
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          childAspectRatio: 1.2,
-                          children: [
-                            _buildDetailCard(
-                              icon: Icons.air,
-                              label: 'Wind',
-                              value: '${provider.weatherData!.windSpeed} m/s',
-                            ),
-                            _buildDetailCard(
-                              icon: Icons.water_drop,
-                              label: 'Humidity',
-                              value: '${provider.weatherData!.humidity}%',
-                            ),
-                            _buildDetailCard(
-                              icon: Icons.speed,
-                              label: 'Pressure',
-                              value: '${provider.weatherData!.pressure} hPa',
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-
-                        // Map Section
-                        Card(
-                          elevation: 2,
-                          child: Container(
-                            color: Colors.white,
-                            child: Column(
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.all(12.0),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      const Text(
-                                        'Location',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                        ),
-                                      ),
-                                      Row(
-                                        children: [
-                                          IconButton(
-                                            icon: const Icon(Icons.my_location),
-                                            color: Colors.green.shade800,
-                                            onPressed: () {
-                                              provider.fetchWeatherByLocation();
-                                            },
-                                          ),
-                                          IconButton(
-                                            icon: Icon(
-                                              _mapExpanded
-                                                  ? Icons.fullscreen_exit
-                                                  : Icons.fullscreen,
-                                            ),
-                                            color: Colors.green.shade800,
-                                            onPressed: () {
-                                              setState(() {
-                                                _mapExpanded = !_mapExpanded;
-                                              });
-                                            },
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                // Modified Map Container
-                                Container(
-                                  height:
-                                      _mapExpanded
-                                          ? constraints.maxHeight * 0.5
-                                          : constraints.maxHeight * 0.3,
-                                  width: double.infinity,
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                      color: Colors.grey.shade300,
-                                    ),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(8),
-                                    child: GoogleMap(
-                                      initialCameraPosition: CameraPosition(
-                                        target:
-                                            provider.currentPosition != null
-                                                ? LatLng(
-                                                  provider
-                                                      .currentPosition!
-                                                      .latitude,
-                                                  provider
-                                                      .currentPosition!
-                                                      .longitude,
-                                                )
-                                                : const LatLng(
-                                                  -6.7924,
-                                                  39.2083,
-                                                ),
-                                        zoom:
-                                            provider.currentPosition != null
-                                                ? 14
-                                                : 10,
-                                      ),
-                                      markers:
-                                          provider.currentPosition != null
-                                              ? {
-                                                Marker(
-                                                  markerId: const MarkerId(
-                                                    'currentLocation',
-                                                  ),
-                                                  position: LatLng(
-                                                    provider
-                                                        .currentPosition!
-                                                        .latitude,
-                                                    provider
-                                                        .currentPosition!
-                                                        .longitude,
-                                                  ),
-                                                  infoWindow: InfoWindow(
-                                                    title: 'Your Location',
-                                                  ),
-                                                ),
-                                              }
-                                              : {},
-                                      onMapCreated: (
-                                        GoogleMapController controller,
-                                      ) {
-                                        setState(() {
-                                          _mapController = controller;
-                                          _isMapReady = true;
-
-                                          // Animate to current position if available
-                                          if (provider.currentPosition !=
-                                              null) {
-                                            controller.animateCamera(
-                                              CameraUpdate.newLatLng(
-                                                LatLng(
-                                                  provider
-                                                      .currentPosition!
-                                                      .latitude,
-                                                  provider
-                                                      .currentPosition!
-                                                      .longitude,
-                                                ),
-                                              ),
-                                            );
-                                          }
-                                        });
-                                      },
-                                      onTap: (position) {
-                                        provider.updatePosition(position);
-                                        if (_isMapReady) {
-                                          _mapController.animateCamera(
-                                            CameraUpdate.newLatLng(position),
-                                          );
-                                        }
-                                      },
-                                      myLocationEnabled: true,
-                                      myLocationButtonEnabled: false,
-                                      zoomControlsEnabled: true,
-                                      mapToolbarEnabled: true,
-                                    ),
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Text(
-                                    provider.currentPosition != null
-                                        ? 'Lat: ${provider.currentPosition!.latitude.toStringAsFixed(4)}, '
-                                            'Lng: ${provider.currentPosition!.longitude.toStringAsFixed(4)}'
-                                        : 'Tap on map to select location',
-                                    style: const TextStyle(color: Colors.grey),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-
-                        // Crop Suggestion Section
-                        const SizedBox(height: 20),
-                        Card(
-                          elevation: 2,
-                          child: Container(
-                            color: Colors.white,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Padding(
-                                  padding: EdgeInsets.all(16.0),
-                                  child: Text(
-                                    'Recommended Crops',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                                ListView.separated(
-                                  physics: const NeverScrollableScrollPhysics(),
-                                  shrinkWrap: true,
-                                  itemCount: cropSuggestions.length,
-                                  separatorBuilder:
-                                      (context, index) => const Divider(),
-                                  itemBuilder: (context, index) {
-                                    final crop = cropSuggestions[index];
-                                    return _buildCropListTile(crop);
-                                  },
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ] else
-                        SizedBox(
-                          height: constraints.maxHeight * 0.7,
-                          child: const Center(
-                            child: Text(
-                              'Search for a city or use your current location',
-                              style: TextStyle(fontSize: 18),
-                            ),
-                          ),
-                        ),
+                      // Weather Content
+                      _buildWeatherContent(context, provider, constraints),
                     ],
                   ),
                 ),
@@ -431,6 +157,320 @@ class _WeatherScreenState extends State<WeatherScreen> {
             },
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildWeatherContent(
+    BuildContext context,
+    WeatherProvider provider,
+    BoxConstraints constraints,
+  ) {
+    if (provider.isLoading) {
+      return SizedBox(
+        height: constraints.maxHeight * 0.7,
+        child: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (provider.errorMessage != null) {
+      return SizedBox(
+        height: constraints.maxHeight * 0.7,
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                provider.errorMessage!,
+                style: const TextStyle(color: AppColors.error),
+              ),
+              TextButton(
+                onPressed: provider.fetchWeatherByLocation,
+                child: const Text('Retry'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (provider.weatherData == null) {
+      return SizedBox(
+        height: constraints.maxHeight * 0.7,
+        child: const Center(
+          child: Text(
+            'Search for a city or use your current location',
+            style: TextStyle(fontSize: 18),
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      children: [
+        // Weather Summary Card
+        // _buildWeatherSummaryCard(provider),
+
+        // Weather Details Grid
+        _buildWeatherDetailsGrid(provider),
+        const SizedBox(height: 16),
+
+        // Map Section
+        _buildMapSection(context, provider, constraints),
+
+        // Crop Suggestions
+        const SizedBox(height: 20),
+        _buildCropSuggestionsSection(),
+      ],
+    );
+  }
+
+  Widget _buildWeatherSummaryCard(WeatherProvider provider) {
+    return Card(
+      elevation: 2,
+      margin: const EdgeInsets.only(bottom: 16),
+      child: Container(
+        color: AppColors.pureWhite,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        DateFormat(
+                          'EEE, MMM d',
+                        ).format(provider.weatherData!.date),
+                        style: const TextStyle(
+                          color: AppColors.subtext,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Text(
+                        '${((provider.weatherData!.temperature * 9 / 5) + 32).toStringAsFixed(0)}°',
+                        style: const TextStyle(
+                          fontSize: 36,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Icon(
+                        _getWeatherIcon(provider.weatherData!.mainCondition),
+                        size: 40,
+                        color: AppColors.warning,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                provider.weatherData!.mainCondition,
+                style: const TextStyle(fontSize: 16, color: AppColors.subtext),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWeatherDetailsGrid(WeatherProvider provider) {
+    return GridView.count(
+      crossAxisCount: 3,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      childAspectRatio: 1.2,
+      children: [
+        _buildDetailCard(
+          icon: Icons.air,
+          label: 'Wind',
+          value: '${provider.weatherData!.windSpeed} m/s',
+        ),
+        _buildDetailCard(
+          icon: Icons.water_drop,
+          label: 'Humidity',
+          value: '${provider.weatherData!.humidity}%',
+        ),
+        _buildDetailCard(
+          icon: Icons.speed,
+          label: 'Pressure',
+          value: '${provider.weatherData!.pressure} hPa',
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMapSection(
+    BuildContext context,
+    WeatherProvider provider,
+    BoxConstraints constraints,
+  ) {
+    return Card(
+      elevation: 2,
+      child: Container(
+        color: AppColors.pureWhite,
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Location',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.my_location),
+                        color: AppColors.greenDark,
+                        onPressed: provider.fetchWeatherByLocation,
+                      ),
+                      IconButton(
+                        icon: Icon(
+                          _mapExpanded
+                              ? Icons.fullscreen_exit
+                              : Icons.fullscreen,
+                        ),
+                        color: AppColors.greenDark,
+                        onPressed:
+                            () => setState(() => _mapExpanded = !_mapExpanded),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              height:
+                  _mapExpanded
+                      ? constraints.maxHeight * 0.5
+                      : constraints.maxHeight * 0.3,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey.shade300),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: GoogleMap(
+                  initialCameraPosition: CameraPosition(
+                    target:
+                        provider.currentPosition != null
+                            ? LatLng(
+                              provider.currentPosition!.latitude,
+                              provider.currentPosition!.longitude,
+                            )
+                            : const LatLng(-6.7924, 39.2083),
+                    zoom: provider.currentPosition != null ? 14 : 10,
+                  ),
+                  markers:
+                      provider.currentPosition != null
+                          ? {
+                            Marker(
+                              markerId: const MarkerId('currentLocation'),
+                              position: LatLng(
+                                provider.currentPosition!.latitude,
+                                provider.currentPosition!.longitude,
+                              ),
+                              infoWindow: const InfoWindow(
+                                title: 'Your Location',
+                              ),
+                            ),
+                          }
+                          : {},
+                  onMapCreated: (controller) {
+                    setState(() {
+                      _mapController = controller;
+                      _isMapReady = true;
+                      if (provider.currentPosition != null) {
+                        controller.animateCamera(
+                          CameraUpdate.newLatLng(
+                            LatLng(
+                              provider.currentPosition!.latitude,
+                              provider.currentPosition!.longitude,
+                            ),
+                          ),
+                        );
+                      }
+                    });
+                  },
+                  onTap: (position) {
+                    provider.updatePosition(position);
+                    if (_isMapReady) {
+                      _mapController.animateCamera(
+                        CameraUpdate.newLatLng(position),
+                      );
+                    }
+                  },
+                  myLocationEnabled: true,
+                  myLocationButtonEnabled: false,
+                  zoomControlsEnabled: true,
+                  mapToolbarEnabled: true,
+                ),
+              ),
+            ),
+            Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    provider.currentPosition != null
+                        ? 'Lat: ${provider.currentPosition!.latitude.toStringAsFixed(4)}, '
+                            'Lng: ${provider.currentPosition!.longitude.toStringAsFixed(4)}'
+                        : 'Tap on map to select location',
+                    style: const TextStyle(color: Colors.grey),
+                  ),
+                ),
+                ExpandedButton(
+                  onPressed: () async => await provider.fetchCropPredictions(),
+                  text: 'Predict Crops',
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCropSuggestionsSection() {
+    return Card(
+      elevation: 2,
+      child: Container(
+        color: Colors.white,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Text(
+                'Recommended Crops',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+            ),
+            ListView.separated(
+              physics: const NeverScrollableScrollPhysics(),
+              shrinkWrap: true,
+              itemCount: cropSuggestions.length,
+              separatorBuilder: (context, index) => const Divider(),
+              itemBuilder:
+                  (context, index) =>
+                      _buildCropListTile(cropSuggestions[index]),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -484,7 +524,6 @@ class _WeatherScreenState extends State<WeatherScreen> {
             color: Colors.white,
             borderRadius: BorderRadius.circular(8),
             image: DecorationImage(
-              // Use a placeholder for now. In production, you'd use proper image handling
               image: AssetImage(crop['imageUrl']),
               fit: BoxFit.cover,
               onError: (_, __) => const Icon(Icons.image_not_supported),
@@ -525,10 +564,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
           ],
         ),
         isThreeLine: true,
-        onTap: () {
-          // Navigate to crop detail page or show more info
-          _showCropDetails(crop);
-        },
+        onTap: () => _showCropDetails(crop),
       ),
     );
   }
@@ -648,7 +684,6 @@ class _WeatherScreenState extends State<WeatherScreen> {
                         '90-120 days',
                       ),
                       const SizedBox(height: 16),
-                      // Potential Yield
                       const Text(
                         'Potential Yield',
                         style: TextStyle(
@@ -669,10 +704,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
                             foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(vertical: 12),
                           ),
-                          onPressed: () {
-                            // Navigate to detailed crop planning or resource page
-                            Navigator.pop(context);
-                          },
+                          onPressed: () => Navigator.pop(context),
                           child: const Text('Get Growing Guide'),
                         ),
                       ),

@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
+import 'package:agrosmart/services/crop_diseases_service.dart';
 
 class CropPredictionProvider extends ChangeNotifier {
+  final CropPredictionService _cropPredictionService = CropPredictionService();
   // Structure to match the provided JSON result
   List<Map<String, dynamic>> predictionResults = [];
   Map<String, dynamic> currentPrediction = {
     "location": {"latitude": null, "longitude": null, "address": "N/A"},
     "soil_properties": {},
     "weather": {},
-    "ai_recommendations": {"predicted_crop": null},
+    "recommendations": {},
   };
 
   // Getter for all prediction results
@@ -41,13 +43,20 @@ class CropPredictionProvider extends ChangeNotifier {
   double? get rainfall => currentPrediction['weather']['rainfall'];
 
   // AI Recommendations
-  String? get predictedCrop =>
-      currentPrediction['ai_recommendations']['predicted_crop'];
+  List<String> get predictedCrop {
+    final recommendations = currentPrediction['recommendations'];
+    if (recommendations != null &&
+        recommendations is Map &&
+        recommendations.isNotEmpty) {
+      // Convert all keys (crop names) into a list
+      return recommendations.keys.toList().cast<String>();
+    }
+    return []; // Return empty list if no recommendations
+  }
 
   // Method to update current prediction result
   void updateCurrentPrediction(Map<String, dynamic> newResult) {
     currentPrediction = newResult;
-    // Add to history if not already present
     if (!predictionResults.any(
       (prediction) =>
           prediction['location']['latitude'] ==
@@ -92,5 +101,20 @@ class CropPredictionProvider extends ChangeNotifier {
       "ai_recommendations": {"predicted_crop": null},
     };
     notifyListeners();
+  }
+
+  // Method to fetch predictions based on latitude and longitude
+  Future<void> fetchPredictions(double latitude, double longitude) async {
+    try {
+      final payload = {"latitude": latitude, "longitude": longitude};
+
+      final result = await _cropPredictionService.getpredictedCrops(payload);
+
+      if (result != null) {
+        updateCurrentPrediction(result);
+      }
+    } catch (e) {
+      debugPrint('Error fetching predictions: $e');
+    }
   }
 }

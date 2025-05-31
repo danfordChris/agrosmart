@@ -17,48 +17,47 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
 
   // Sample products data
   final List<CropProduct> _products = [
-    // list from the predicted crops
     CropProduct(
       id: '1',
-      name: 'Mchele',
+      name: 'Rice',
       description:
           'High-quality rice grown in ideal conditions. Perfect for daily cooking.',
       idealTemperature: '20°C - 35°C',
       imageUrl: 'assets/images/rice.png',
       suitability: 'High',
       price: 45000,
-      seller: 'Tomas John',
+      seller: 'Thomas John',
       location: 'Arusha',
       date: '10/2/25',
     ),
     CropProduct(
       id: '2',
-      name: 'Maharage ya njano',
+      name: 'Yellow Beans',
       description: 'Nutritious yellow beans rich in protein and fiber.',
       idealTemperature: '18°C - 30°C',
       imageUrl: 'assets/images/beans.png',
       suitability: 'Medium',
       price: 45000,
-      seller: 'Tomas John',
+      seller: 'Thomas John',
       location: 'Arusha',
       date: '10/2/25',
     ),
     CropProduct(
       id: '3',
-      name: 'Mahindi',
+      name: 'Maize',
       description:
           'Fresh corn suitable for both human consumption and animal feed.',
       idealTemperature: '20°C - 32°C',
       imageUrl: 'assets/images/maize.png',
       suitability: 'High',
       price: 45000,
-      seller: 'Tomas John',
+      seller: 'Thomas John',
       location: 'Arusha',
       date: '10/2/25',
     ),
     CropProduct(
       id: '4',
-      name: 'Ngano',
+      name: 'Wheat',
       description:
           'Premium wheat grains ideal for making flour and bread products.',
       idealTemperature: '15°C - 25°C',
@@ -71,7 +70,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
     ),
     CropProduct(
       id: '5',
-      name: 'Soya',
+      name: 'Soybeans',
       description:
           'High-protein soybeans suitable for various food products and oil.',
       idealTemperature: '20°C - 30°C',
@@ -153,7 +152,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
-          'Soko la mazao',
+          'Crop Marketplace',
           style: TextStyle(color: Colors.black),
         ),
         actions: [
@@ -213,7 +212,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                     child: TextField(
                       controller: _searchController,
                       decoration: const InputDecoration(
-                        hintText: 'Tafuta mazao...',
+                        hintText: 'Search for crops...',
                         border: InputBorder.none,
                       ),
                       onChanged: (value) {
@@ -239,26 +238,6 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
             ),
           ),
 
-          // Add product button
-          // Padding(
-          //   padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          //   child: Align(
-          //     alignment: Alignment.centerRight,
-          //     child: ElevatedButton.icon(
-          //       style: ElevatedButton.styleFrom(
-          //         backgroundColor: Colors.green,
-          //         shape: RoundedRectangleBorder(
-          //           borderRadius: BorderRadius.circular(8),
-          //         ),
-          //       ), // <-- Close the style properly here
-          //       icon: const Icon(Icons.add, size: 20),
-          //       label: const Text('Ongeza bidhaa'),
-          //       onPressed: () => _showAddProductDialog(context),
-          //     ),
-          //   ),
-          // ),
-          // const SizedBox(height: 8),
-
           // Product listings
           Expanded(
             child:
@@ -274,7 +253,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            'Hakuna matokeo ya "${_searchQuery}"',
+                            'No results for "${_searchQuery}"',
                             style: const TextStyle(
                               fontSize: 16,
                               color: Colors.grey,
@@ -537,7 +516,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                               borderRadius: BorderRadius.circular(16),
                             ),
                             child: Text(
-                              'Ufanisi: ${product.suitability}',
+                              'Suitability: ${product.suitability}',
                               style: TextStyle(
                                 color: _getSuitabilityColor(
                                   product.suitability,
@@ -596,7 +575,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                                     ),
                                   ),
                                   Text(
-                                    'Mahali: ${product.location}',
+                                    'Location: ${product.location}',
                                     style: TextStyle(
                                       color: Colors.grey.shade600,
                                     ),
@@ -627,7 +606,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
 
                       // Product description
                       const Text(
-                        'Maelezo',
+                        'Description',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -645,7 +624,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
 
                       // Growing information
                       const Text(
-                        'Maelezo ya kilimo',
+                        'Growing Information',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -654,13 +633,13 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                       const SizedBox(height: 8),
                       _buildInfoRow(
                         Icons.thermostat,
-                        'Halijoto inayofaa',
+                        'Ideal Temperature',
                         product.idealTemperature,
                       ),
                       const SizedBox(height: 8),
                       _buildInfoRow(
                         Icons.calendar_today,
-                        'Tarehe ya kutangaza',
+                        'Listing Date',
                         product.date,
                       ),
                       const SizedBox(height: 30),
@@ -681,9 +660,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                               listen: false,
                             ).addToCart(product);
                             Navigator.pop(context);
-                            _showSuccessMessage(
-                              'Bidhaa imeongezwa kwenye gari',
-                            );
+                            _showSuccessMessage('Product added to cart');
                           },
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 14),
@@ -691,9 +668,9 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
-                          ), // <- you missed this closing bracket
+                          ),
                           child: const Text(
-                            'Weka kwenye gari',
+                            'Add to Cart',
                             style: TextStyle(fontSize: 16, color: Colors.green),
                           ),
                         ),
@@ -722,7 +699,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                             ),
                           ),
                           child: const Text(
-                            'Nunua sasa',
+                            'Buy Now',
                             style: TextStyle(fontSize: 16, color: Colors.white),
                           ),
                         ),
@@ -782,7 +759,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text('Ongeza bidhaa mpya'),
+            title: const Text('Add New Product'),
             content: Form(
               key: _formKey,
               child: SingleChildScrollView(
@@ -792,12 +769,12 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                     TextFormField(
                       controller: _nameController,
                       decoration: const InputDecoration(
-                        labelText: 'Jina la bidhaa',
+                        labelText: 'Product Name',
                         border: OutlineInputBorder(),
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Tafadhali ingiza jina la bidhaa';
+                          return 'Please enter product name';
                         }
                         return null;
                       },
@@ -806,16 +783,16 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                     TextFormField(
                       controller: _priceController,
                       decoration: const InputDecoration(
-                        labelText: 'Bei',
+                        labelText: 'Price',
                         border: OutlineInputBorder(),
                       ),
                       keyboardType: TextInputType.number,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Tafadhali ingiza bei';
+                          return 'Please enter price';
                         }
                         if (double.tryParse(value) == null) {
-                          return 'Tafadhali ingiza namba sahihi';
+                          return 'Please enter a valid number';
                         }
                         return null;
                       },
@@ -824,13 +801,13 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                     TextFormField(
                       controller: _descController,
                       decoration: const InputDecoration(
-                        labelText: 'Maelezo',
+                        labelText: 'Description',
                         border: OutlineInputBorder(),
                       ),
                       maxLines: 3,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Tafadhali ingiza maelezo';
+                          return 'Please enter description';
                         }
                         return null;
                       },
@@ -839,12 +816,12 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                     TextFormField(
                       controller: _sellerController,
                       decoration: const InputDecoration(
-                        labelText: 'Jina lako',
+                        labelText: 'Your Name',
                         border: OutlineInputBorder(),
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Tafadhali ingiza jina lako';
+                          return 'Please enter your name';
                         }
                         return null;
                       },
@@ -853,12 +830,12 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                     TextFormField(
                       controller: _locationController,
                       decoration: const InputDecoration(
-                        labelText: 'Mahali',
+                        labelText: 'Location',
                         border: OutlineInputBorder(),
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Tafadhali ingiza mahali';
+                          return 'Please enter location';
                         }
                         return null;
                       },
@@ -870,7 +847,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('Futa'),
+                child: const Text('Cancel'),
               ),
               ElevatedButton(
                 onPressed: () {
@@ -894,11 +871,11 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                     });
 
                     Navigator.pop(context);
-                    _showSuccessMessage('Bidhaa imeongezwa kikamilifu');
+                    _showSuccessMessage('Product added successfully');
                   }
                 },
                 style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-                child: const Text('Hifadhi'),
+                child: const Text('Save'),
               ),
             ],
           ),
@@ -913,7 +890,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
             (context) => Scaffold(
               appBar: AppBar(
                 surfaceTintColor: Colors.white,
-                title: const Text('Mapendekezo ya mazao'),
+                title: const Text('Crop Recommendations'),
                 backgroundColor: Colors.white,
                 foregroundColor: Colors.black,
                 elevation: 0,
@@ -1048,7 +1025,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                                   backgroundColor: Colors.green,
                                 ),
                                 child: const Text(
-                                  'Tafuta bidhaa',
+                                  'Find Products',
                                   style: TextStyle(color: Colors.white),
                                 ),
                               ),
