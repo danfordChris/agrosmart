@@ -12,10 +12,10 @@ class WeatherScreen1 extends StatefulWidget {
   final LocationService locationService;
 
   const WeatherScreen1({
-    Key? key,
+    super.key,
     required this.weatherService,
     required this.locationService,
-  }) : super(key: key);
+  });
 
   @override
   _WeatherScreenState createState() => _WeatherScreenState();

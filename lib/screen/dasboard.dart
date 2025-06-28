@@ -8,8 +8,10 @@ import 'package:agrosmart/screen/disease_detection/camera_screen.dart';
 import 'package:agrosmart/screen/disease_detection/crop_disease_scanner_screen.dart';
 import 'package:agrosmart/screen/market_place.dart';
 import 'package:agrosmart/screen/user_account_screen.dart';
+import 'package:agrosmart/screen/user_profile.dart';
 import 'package:agrosmart/screen/weather_screen.dart';
 import 'package:agrosmart/services/crop_diseases_service.dart';
+import 'package:agrosmart/services/session_manager.dart';
 import 'package:agrosmart/weather/weather_screen.dart';
 import 'package:agrosmart/weather/weather_service.dart';
 import 'package:agrosmart/weather/location_service.dart';
@@ -94,18 +96,21 @@ class _AgroSmartHomeState extends State<AgroSmartHome> {
           Padding(
             padding: const EdgeInsets.only(right: 16.0),
             child: GestureDetector(
-              onTap: () {
-                // Handle profile icon tap
-                // Navigator.push(
-                //   context,
-                //   MaterialPageRoute(
-                //     builder: (context) => const UserAccountScreen(),
-                //   ),
-                // );
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => LoginScreen()),
-                );
+              onTap: () async {
+                try {
+                  final user = SessionManager.instance.user;
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => UserProfileScreen(),
+                    ),
+                  );
+                } catch (e) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => LoginScreen()),
+                  );
+                }
               },
               child: CircleAvatar(
                 backgroundColor: AppColors.pureWhite,

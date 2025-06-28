@@ -8,10 +8,10 @@ class CitySearchField extends StatefulWidget {
   final void Function(City) onCitySelected;
 
   const CitySearchField({
-    Key? key,
+    super.key,
     required this.onSearch,
     required this.onCitySelected,
-  }) : super(key: key);
+  });
 
   @override
   _CitySearchFieldState createState() => _CitySearchFieldState();

@@ -253,7 +253,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            'No results for "${_searchQuery}"',
+                            'No results for "$_searchQuery"',
                             style: const TextStyle(
                               fontSize: 16,
                               color: Colors.grey,
@@ -748,12 +748,12 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
   }
 
   void _showAddProductDialog(BuildContext context) {
-    final _formKey = GlobalKey<FormState>();
-    final _nameController = TextEditingController();
-    final _priceController = TextEditingController();
-    final _descController = TextEditingController();
-    final _sellerController = TextEditingController();
-    final _locationController = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+    final nameController = TextEditingController();
+    final priceController = TextEditingController();
+    final descController = TextEditingController();
+    final sellerController = TextEditingController();
+    final locationController = TextEditingController();
 
     showDialog(
       context: context,
@@ -761,13 +761,13 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
           (context) => AlertDialog(
             title: const Text('Add New Product'),
             content: Form(
-              key: _formKey,
+              key: formKey,
               child: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     TextFormField(
-                      controller: _nameController,
+                      controller: nameController,
                       decoration: const InputDecoration(
                         labelText: 'Product Name',
                         border: OutlineInputBorder(),
@@ -781,7 +781,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
-                      controller: _priceController,
+                      controller: priceController,
                       decoration: const InputDecoration(
                         labelText: 'Price',
                         border: OutlineInputBorder(),
@@ -799,7 +799,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
-                      controller: _descController,
+                      controller: descController,
                       decoration: const InputDecoration(
                         labelText: 'Description',
                         border: OutlineInputBorder(),
@@ -814,7 +814,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
-                      controller: _sellerController,
+                      controller: sellerController,
                       decoration: const InputDecoration(
                         labelText: 'Your Name',
                         border: OutlineInputBorder(),
@@ -828,7 +828,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
-                      controller: _locationController,
+                      controller: locationController,
                       decoration: const InputDecoration(
                         labelText: 'Location',
                         border: OutlineInputBorder(),
@@ -851,17 +851,17 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
               ),
               ElevatedButton(
                 onPressed: () {
-                  if (_formKey.currentState!.validate()) {
+                  if (formKey.currentState!.validate()) {
                     final newProduct = CropProduct(
                       id: DateTime.now().millisecondsSinceEpoch.toString(),
-                      name: _nameController.text,
-                      description: _descController.text,
+                      name: nameController.text,
+                      description: descController.text,
                       idealTemperature: '20°C - 30°C',
                       imageUrl: 'assets/images/default_product.png',
                       suitability: 'High',
-                      price: double.parse(_priceController.text),
-                      seller: _sellerController.text,
-                      location: _locationController.text,
+                      price: double.parse(priceController.text),
+                      seller: sellerController.text,
+                      location: locationController.text,
                       date:
                           '${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}',
                     );

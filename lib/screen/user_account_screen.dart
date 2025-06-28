@@ -2,7 +2,6 @@
 import 'package:agrosmart/provider/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:agrosmart/Constants/app_colors.dart';
 
 class UserAccountScreen extends StatefulWidget {
   const UserAccountScreen({super.key});

@@ -73,11 +73,10 @@ class _WeatherScreenState extends State<WeatherScreen> {
     if (!mounted) return;
 
     setState(() {
-      if (cropProvider.isPredictionAvailable &&
-          cropProvider.predictedCrop != null) {
+      if (cropProvider.isPredictionAvailable) {
         cropSuggestions = [
           {
-            'name': cropProvider.predictedCrop!,
+            'name': cropProvider.predictedCrop,
             'description':
                 cropProvider.currentPrediction['explanation'] ??
                 'Recommended crop based on soil and weather conditions.',

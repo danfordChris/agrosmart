@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:agrosmart/Constants/app_colors.dart';
+import 'package:agrosmart/repositories/user_info_repository.dart';
 import 'package:agrosmart/screen/dasboard.dart';
+import 'package:agrosmart/services/session_manager.dart';
 import 'package:flutter/material.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -41,12 +43,23 @@ class _SplashScreenState extends State<SplashScreen>
       _startTypewriter();
     });
 
+    _loadUserInfo();
+
     // Navigate after 5 seconds
     Future.delayed(const Duration(seconds: 6), () {
       Navigator.of(
         context,
       ).pushReplacement(MaterialPageRoute(builder: (_) => const Dashboard()));
     });
+  }
+
+  void _loadUserInfo() async {
+    final user = await UserInfoRepository.instance.all;
+    if (user.isNotEmpty) {
+      SessionManager.instance.setUserInfo(user.first);
+
+      print("${SessionManager.instance.user.toJson}");
+    }
   }
 
   void _startTypewriter() {

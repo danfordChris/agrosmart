@@ -1,7 +1,8 @@
 // lib/screens/Auth/signup_screen.dart
+import 'package:agrosmart/models/user_info_model.dart';
 import 'package:agrosmart/provider/auth_provider.dart';
 import 'package:agrosmart/screen/Auth/login_screen.dart';
-import 'package:agrosmart/screen/dasboard.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:agrosmart/Constants/app_colors.dart';
@@ -16,7 +17,9 @@ class SignupScreen extends StatefulWidget {
 
 class _SignupScreenState extends State<SignupScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
+  final _firstNameController = TextEditingController();
+  final _userNameController = TextEditingController();
+  final _LastNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
@@ -25,11 +28,28 @@ class _SignupScreenState extends State<SignupScreen> {
 
   @override
   void dispose() {
-    _nameController.dispose();
+    _firstNameController.dispose();
+    _LastNameController.dispose();
+    _userNameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    if (kDebugMode) {
+      {
+        _userNameController.text = "DanfordChris";
+        _firstNameController.text = "Danford";
+        _LastNameController.text = "Christopher";
+        _emailController.text = "danford@gmail.com";
+        _passwordController.text = "password386";
+        _confirmPasswordController.text = "password386";
+      }
+    }
+    super.initState();
   }
 
   @override
@@ -74,15 +94,92 @@ class _SignupScreenState extends State<SignupScreen> {
                   style: TextStyle(fontSize: 16, color: AppColors.subtext),
                 ),
                 SizedBox(height: size.height * 0.04),
+
                 // Name Field
                 TextFormField(
-                  controller: _nameController,
+                  controller: _userNameController,
                   decoration: InputDecoration(
                     prefixIcon: Icon(
                       Icons.person_outline,
                       color: AppColors.subtext,
                     ),
-                    labelText: "Jina kamili",
+                    labelText: "Username",
+                    labelStyle: TextStyle(color: AppColors.subtext),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(
+                        color: AppColors.subtext.withOpacity(0.3),
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(
+                        color: AppColors.subtext.withOpacity(0.3),
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(
+                        color: AppColors.primary,
+                        width: 2,
+                      ),
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Tafadhali ingiza username';
+                    }
+                    return null;
+                  },
+                ),
+
+                const SizedBox(height: 16),
+
+                TextFormField(
+                  controller: _firstNameController,
+                  decoration: InputDecoration(
+                    prefixIcon: Icon(
+                      Icons.person_outline,
+                      color: AppColors.subtext,
+                    ),
+                    labelText: "Jina La Kwanza",
+                    labelStyle: TextStyle(color: AppColors.subtext),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(
+                        color: AppColors.subtext.withOpacity(0.3),
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(
+                        color: AppColors.subtext.withOpacity(0.3),
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(
+                        color: AppColors.primary,
+                        width: 2,
+                      ),
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Tafadhali ingiza jina lako';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _LastNameController,
+                  decoration: InputDecoration(
+                    prefixIcon: Icon(
+                      Icons.person_outline,
+                      color: AppColors.subtext,
+                    ),
+                    labelText: "Jina la Mwisho",
                     labelStyle: TextStyle(color: AppColors.subtext),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
@@ -291,18 +388,18 @@ class _SignupScreenState extends State<SignupScreen> {
                             : () async {
                               if (_formKey.currentState!.validate()) {
                                 try {
-                                  await authProvider.signup(
-                                    _nameController.text.trim(),
-                                    _emailController.text.trim(),
-                                    _passwordController.text.trim(),
+                                  final userData = UserInfoModel(
+                                    username: _userNameController.text.trim(),
+                                    first_name:
+                                        _firstNameController.text.trim(),
+                                    last_name: _LastNameController.text.trim(),
+                                    email: _emailController.text.trim(),
+                                    password: _passwordController.text.trim(),
+                                    password2:
+                                        _confirmPasswordController.text.trim(),
                                   );
-                                  // Navigate to dashboard on success
-                                  Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => const Dashboard(),
-                                    ),
-                                  );
+
+                                  await authProvider.signup(userData, context);
                                 } catch (e) {
                                   // Error is already handled in provider
                                 }

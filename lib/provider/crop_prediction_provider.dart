@@ -110,10 +110,8 @@ class CropPredictionProvider extends ChangeNotifier {
 
       final result = await _cropPredictionService.getpredictedCrops(payload);
 
-      if (result != null) {
-        updateCurrentPrediction(result);
-      }
-    } catch (e) {
+      updateCurrentPrediction(result);
+        } catch (e) {
       debugPrint('Error fetching predictions: $e');
     }
   }

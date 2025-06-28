@@ -3,8 +3,8 @@ import 'dart:io';
 import 'dart:async';
 
 import 'package:agrosmart/Constants/agrosmart_list.dart';
+import 'package:agrosmart/Constants/api_urls.dart';
 import 'package:agrosmart/models/crop_diseases_model.dart';
-import 'package:agrosmart/provider/crop_prediction_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -92,15 +92,13 @@ class CropDetectionService {
 }
 
 class CropPredictionService {
-  static const String apiUrl =
-      'https://grizzly-magnetic-lionfish.ngrok-free.app/recommend/';
-  // 'http://example.com';
+  static String apiUrl = ApiUrls.cropRecomend;
 
   Future<Map<String, dynamic>> getpredictedCrops(
     Map<String, dynamic> payload,
   ) async {
-    print("DATA LOADING");
     try {
+      print("Calling getpredictedCrops...");
       final response = await http.post(
         Uri.parse(apiUrl),
         headers: {'Content-Type': 'application/json'},
@@ -109,7 +107,7 @@ class CropPredictionService {
 
       if (response.statusCode == 200) {
         final responseBody = json.decode(response.body);
-        debugPrint("Prediction result: $responseBody");
+        print("Decoded response body: $responseBody");
 
         if (responseBody.containsKey('recommendations')) {
           final recommendations = responseBody['recommendations'];
@@ -117,6 +115,7 @@ class CropPredictionService {
             responseBody['ai_recommendations'] = {
               'predicted_crop': recommendations.keys.first,
             };
+            print("AI recommendations: ${responseBody['ai_recommendations']}");
           }
         }
         final data1 = jsonEncode({
@@ -152,11 +151,11 @@ class CropPredictionService {
 
         return decodeData;
       } else {
-        debugPrint('Error: ${response.statusCode}, ${response.body}');
+        print('Error: ${response.statusCode}, ${response.body}');
         throw Exception('Failed to get prediction details');
       }
     } catch (e) {
-      debugPrint('Error fetching data: $e');
+      print('Error fetching data: $e');
       throw Exception("Something went wrong");
     }
   }

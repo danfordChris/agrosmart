@@ -131,15 +131,16 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                 try {
                                   await authProvider.resetPassword(
                                     _emailController.text.trim(),
+                                    context,
                                   );
                                   // Show success message
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text(
-                                        'Umepewa maelekezo kwa barua pepe yako',
-                                      ),
-                                    ),
-                                  );
+                                  // ScaffoldMessenger.of(context).showSnackBar(
+                                  //   const SnackBar(
+                                  //     content: Text(
+                                  //       'Umepewa maelekezo kwa barua pepe yako',
+                                  //     ),
+                                  //   ),
+                                  // );
                                   Navigator.pop(context);
                                 } catch (e) {
                                   // Error is already handled in provider

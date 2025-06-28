@@ -1,13 +1,12 @@
 // lib/screens/Auth/login_screen.dart
+import 'package:agrosmart/models/user_info_model.dart';
 import 'package:agrosmart/provider/auth_provider.dart';
 import 'package:agrosmart/screen/Auth/forget_password_screen.dart';
 import 'package:agrosmart/screen/Auth/signup_screen.dart';
-import 'package:agrosmart/screen/dasboard.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:agrosmart/Constants/app_colors.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -33,8 +32,8 @@ class _LoginScreenState extends State<LoginScreen> {
   void initState() {
     super.initState();
     if (kDebugMode) {
-      _emailController.text = 'test@test.com';
-      _passwordController.text = '123456@sasa';
+      _emailController.text = 'DanfordChris';
+      _passwordController.text = 'password386';
     }
   }
 
@@ -214,17 +213,12 @@ class _LoginScreenState extends State<LoginScreen> {
                             : () async {
                               if (_formKey.currentState!.validate()) {
                                 try {
-                                  await authProvider.login(
-                                    _emailController.text.trim(),
-                                    _passwordController.text.trim(),
+                                  final user = UserInfoModel(
+                                    username: _emailController.text.trim(),
+                                    password: _passwordController.text.trim(),
                                   );
-                                  // Navigate to dashboard on success
-                                  Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => const Dashboard(),
-                                    ),
-                                  );
+                                  await authProvider.login(user, context);
+                            
                                 } catch (e) {
                                   // Error is already handled in provider
                                 }

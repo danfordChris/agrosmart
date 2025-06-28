@@ -24,7 +24,7 @@ class WeatherCard extends StatelessWidget {
 
   Widget _buildWeatherCard(BuildContext context, WeatherData weather) {
     // Helper function to get weather icon based on condition
-    IconData _getWeatherIcon(String condition) {
+    IconData getWeatherIcon(String condition) {
       switch (condition.toLowerCase()) {
         case 'clear':
           return Icons.wb_sunny;
@@ -93,7 +93,7 @@ class WeatherCard extends StatelessWidget {
                 ],
               ),
               Icon(
-                _getWeatherIcon(weather.mainCondition),
+                getWeatherIcon(weather.mainCondition),
                 size: 60,
                 color: Colors.white.withAlpha(204),
               ),

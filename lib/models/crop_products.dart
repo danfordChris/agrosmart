@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 
 // A model class for crop products
 class CropProduct {

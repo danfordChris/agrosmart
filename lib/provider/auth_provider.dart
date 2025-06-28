@@ -1,5 +1,8 @@
 // lib/providers/auth_provider.dart
-import 'package:flutter/foundation.dart';
+import 'package:agrosmart/models/user_info_model.dart';
+import 'package:agrosmart/screen/dasboard.dart';
+import 'package:agrosmart/services/api_manager.dart';
+import 'package:flutter/material.dart';
 
 class AuthProvider with ChangeNotifier {
   bool _isLoading = false;
@@ -8,21 +11,25 @@ class AuthProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
-  Future<void> login(String email, String password) async {
+  Future<void> login(UserInfoModel? user, BuildContext context) async {
     try {
       _isLoading = true;
       notifyListeners();
 
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 2));
-
       // Replace with actual authentication logic
-      if (email.isEmpty || password.isEmpty) {
-        throw Exception('Please enter email and password');
+      if (user!.username == null || user.password == null) {
+        throw Exception('Please enter username/email and password');
       }
+
+      await APIManager.instance.login(context, userData: user);
 
       _isLoading = false;
       _errorMessage = null;
+      // Navigate to dashboard on success
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const Dashboard()),
+      );
       notifyListeners();
     } catch (e) {
       _isLoading = false;
@@ -32,19 +39,25 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  Future<void> signup(String name, String email, String password) async {
+  Future<void> signup(UserInfoModel? userInfo, BuildContext context) async {
     try {
       _isLoading = true;
       notifyListeners();
 
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 2));
-
-      // Replace with actual registration logic
-      if (name.isEmpty || email.isEmpty || password.isEmpty) {
+      if (userInfo!.last_name == null ||
+          userInfo.first_name == null ||
+          userInfo.email == null ||
+          userInfo.password == null) {
         throw Exception('Please fill all fields');
       }
 
+      await APIManager.instance.signUp(userData: userInfo, context);
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const Dashboard()),
+      );
+
       _isLoading = false;
       _errorMessage = null;
       notifyListeners();
@@ -56,18 +69,42 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  Future<void> resetPassword(String email) async {
+  Future<void> resetPassword(String email, BuildContext context) async {
     try {
       _isLoading = true;
       notifyListeners();
-
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 2));
 
       // Replace with actual password reset logic
       if (email.isEmpty || !email.contains('@')) {
         throw Exception('Please enter a valid email');
       }
+      await APIManager.instance.resetPassword(context, userData: email);
+
+      _isLoading = false;
+      _errorMessage = null;
+      notifyListeners();
+    } catch (e) {
+      _isLoading = false;
+      _errorMessage = e.toString();
+      notifyListeners();
+      rethrow;
+    }
+  }
+
+  Future<void> updateProfile(
+    UserInfoModel? userInfo,
+    BuildContext context,
+  ) async {
+    try {
+      _isLoading = true;
+      notifyListeners();
+
+      await APIManager.instance.updateProfile(userData: userInfo, context);
+
+      // Navigator.pushReplacement(
+      //   context,
+      //   MaterialPageRoute(builder: (context) => const Dashboard()),
+      // );
 
       _isLoading = false;
       _errorMessage = null;
