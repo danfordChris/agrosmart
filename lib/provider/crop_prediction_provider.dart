@@ -6,11 +6,17 @@ class CropPredictionProvider extends ChangeNotifier {
   final CropPredictionService _cropPredictionService = CropPredictionService();
   // Structure to match the provided JSON result
   List<Map<String, dynamic>> predictionResults = [];
+  bool _isLoading = false;
+
+  // Getter for loading state
+  bool get isLoading => _isLoading;
+
   Map<String, dynamic> currentPrediction = {
     "location": {"latitude": null, "longitude": null, "address": "N/A"},
     "soil_properties": {},
     "weather": {},
     "recommendations": {},
+    "ai_recommendations": {"predicted_crop": null},
   };
 
   // Getter for all prediction results
@@ -89,6 +95,9 @@ class CropPredictionProvider extends ChangeNotifier {
 
   // Method to check if prediction is available
   bool get isPredictionAvailable =>
+      currentPrediction.containsKey('ai_recommendations') &&
+      currentPrediction['ai_recommendations'] != null &&
+      currentPrediction['ai_recommendations'].containsKey('predicted_crop') &&
       currentPrediction['ai_recommendations']['predicted_crop'] != null;
 
   // Method to clear all predictions
@@ -105,14 +114,20 @@ class CropPredictionProvider extends ChangeNotifier {
 
   // Method to fetch predictions based on latitude and longitude
   Future<void> fetchPredictions(double latitude, double longitude) async {
+    _isLoading = true;
+    notifyListeners();
+
     try {
       final payload = {"latitude": latitude, "longitude": longitude};
 
       final result = await _cropPredictionService.getpredictedCrops(payload);
 
       updateCurrentPrediction(result);
-        } catch (e) {
+    } catch (e) {
       debugPrint('Error fetching predictions: $e');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
   }
 }

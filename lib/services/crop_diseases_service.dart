@@ -146,6 +146,9 @@ class CropPredictionService {
               "score": 0.4196,
             },
           },
+          "ai_recommendations": {
+            "predicted_crop": "Matango",
+          },
         });
         final decodeData = jsonDecode(data1);
 

@@ -76,7 +76,10 @@ class _WeatherScreenState extends State<WeatherScreen> {
       if (cropProvider.isPredictionAvailable) {
         cropSuggestions = [
           {
-            'name': cropProvider.predictedCrop,
+            'name':
+                cropProvider.predictedCrop.isNotEmpty
+                    ? cropProvider.predictedCrop[0]
+                    : 'No crop prediction',
             'description':
                 cropProvider.currentPrediction['explanation'] ??
                 'Recommended crop based on soil and weather conditions.',
@@ -168,7 +171,9 @@ class _WeatherScreenState extends State<WeatherScreen> {
     if (provider.isLoading) {
       return SizedBox(
         height: constraints.maxHeight * 0.7,
-        child: const Center(child: CircularProgressIndicator()),
+        child: Center(
+          child: CircularProgressIndicator(color: AppColors.greenMedium),
+        ),
       );
     }
 
@@ -459,14 +464,28 @@ class _WeatherScreenState extends State<WeatherScreen> {
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),
-            ListView.separated(
-              physics: const NeverScrollableScrollPhysics(),
-              shrinkWrap: true,
-              itemCount: cropSuggestions.length,
-              separatorBuilder: (context, index) => const Divider(),
-              itemBuilder:
-                  (context, index) =>
-                      _buildCropListTile(cropSuggestions[index]),
+            Consumer<CropPredictionProvider>(
+              builder: (context, cropProvider, child) {
+                if (cropProvider.isLoading) {
+                  return Container(
+                    height: 150,
+                    alignment: Alignment.center,
+                    child: const CircularProgressIndicator(
+                      color: AppColors.greenMedium,
+                    ),
+                  );
+                }
+
+                return ListView.separated(
+                  physics: const NeverScrollableScrollPhysics(),
+                  shrinkWrap: true,
+                  itemCount: cropSuggestions.length,
+                  separatorBuilder: (context, index) => const Divider(),
+                  itemBuilder:
+                      (context, index) =>
+                          _buildCropListTile(cropSuggestions[index]),
+                );
+              },
             ),
           ],
         ),

@@ -7,4 +7,5 @@ class ApiUrls {
   static final String resetPassword =
       '$baseUrl/api/auth/password-reset/request/';
   static final String cropRecomend = '$baseUrl/api/recommend/';
+  static final String getMarketProduct = '$baseUrl/api/marketplace/items/';
 }

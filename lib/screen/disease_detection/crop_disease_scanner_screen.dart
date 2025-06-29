@@ -214,7 +214,7 @@
 //         child: Column(
 //           mainAxisAlignment: MainAxisAlignment.center,
 //           children: [
-//             CircularProgressIndicator(),
+//             CircularProgressIndicator(color: AppColors.greenMedium),
 //             SizedBox(height: 16),
 //             Text('Initializing camera...'),
 //           ],

@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'package:agrosmart/Constants/app_colors.dart';
+import 'package:agrosmart/repositories/market_product_repository.dart';
 import 'package:agrosmart/repositories/user_info_repository.dart';
 import 'package:agrosmart/screen/dasboard.dart';
+import 'package:agrosmart/services/api_manager.dart';
 import 'package:agrosmart/services/session_manager.dart';
 import 'package:flutter/material.dart';
 
@@ -54,11 +56,16 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   void _loadUserInfo() async {
+    await APIManager.instance.getmarketProducts(context);
     final user = await UserInfoRepository.instance.all;
     if (user.isNotEmpty) {
       SessionManager.instance.setUserInfo(user.first);
-
       print("${SessionManager.instance.user.toJson}");
+
+      final product = await MarketProductRepository.instance.all;
+      if (product.isNotEmpty) {
+        SessionManager.instance.setMarketProducts(product);
+      }
     }
   }
 

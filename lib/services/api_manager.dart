@@ -1,7 +1,9 @@
 import 'dart:convert';
 
 import 'package:agrosmart/Constants/api_urls.dart';
+import 'package:agrosmart/models/market_product_model.dart';
 import 'package:agrosmart/models/user_info_model.dart';
+import 'package:agrosmart/repositories/market_product_repository.dart';
 import 'package:agrosmart/repositories/user_info_repository.dart';
 import 'package:agrosmart/services/session_manager.dart';
 import 'package:flutter/material.dart';
@@ -230,6 +232,57 @@ class APIManager extends BaseAPIManager {
       }
       debugPrint('Unexpected error: $e');
       Scenery.showError("Failed to login, please retry ");
+      throw Exception('Unexpected error occurred: $e');
+    }
+  }
+
+  Future<List<MarketProductModel>> getmarketProducts(
+    BuildContext context,
+  ) async {
+    final api = ApiUrls.getMarketProduct;
+    final accessTokenFromPref = await _getToken();
+    debugPrint("Token in updating $accessTokenFromPref");
+    final headers = {
+      "Content-Type": "application/json",
+      "Authorization": "Token $accessTokenFromPref",
+    };
+
+    try {
+      final response = await http.get(Uri.parse(api), headers: headers);
+
+      if (response.statusCode <= 299) {
+        final List<dynamic> responseBody = json.decode(response.body);
+        debugPrint("response body: $responseBody");
+        List<MarketProductModel> products =
+            responseBody
+                .map((productJson) => MarketProductModel.fromJson(productJson))
+                .toList();
+
+        for (final product in products) {
+          MarketProductRepository.instance.save(product);
+        }
+        final produ = await MarketProductRepository.instance.all;
+        debugPrint("Fetched ${produ.length} market products");
+
+        final product = await MarketProductRepository.instance.all;
+        if (product.isNotEmpty) {
+          SessionManager.instance.setMarketProducts(product);
+        }
+
+        return products;
+      } else {
+        debugPrint('Error: ${response.statusCode}, ${response.body}');
+        Scenery.showError("${response.statusCode}: Failed to fetch products ");
+        throw Exception('Error: ${response.statusCode}');
+      }
+    } catch (e) {
+      if (e is http.ClientException) {
+        Scenery.showError("Failed to fetch products, please retry ");
+        debugPrint('Network error: ${e.message}');
+        throw Exception('Network error: ${e.message}');
+      }
+      debugPrint('Unexpected error: $e');
+      Scenery.showError("Failed to fetch products, please retry ");
       throw Exception('Unexpected error occurred: $e');
     }
   }

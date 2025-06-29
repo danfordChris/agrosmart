@@ -116,7 +116,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       body: SafeArea(
         child:
             _isLoading
-                ? const Center(child: CircularProgressIndicator())
+                ? const Center(
+                  child: CircularProgressIndicator(
+                    color: AppColors.greenMedium,
+                  ),
+                )
                 : SingleChildScrollView(
                   padding: const EdgeInsets.all(16.0),
                   child: Card(

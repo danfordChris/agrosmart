@@ -55,7 +55,7 @@ class WeatherProvider extends ChangeNotifier {
     double? customLon,
   }) async {
     print('[fetchCropPredictions] Starting crop prediction fetch');
-    _setLoading(true);
+    // Not setting global loading state anymore, using CropPredictionProvider's loading state instead
 
     try {
       // Use custom coordinates if provided, otherwise use stored coordinates
@@ -72,9 +72,10 @@ class WeatherProvider extends ChangeNotifier {
     } catch (e) {
       print('[fetchCropPredictions] Error: $e');
       _setError('Failed to fetch crop predictions: ${e.toString()}');
-      rethrow;
-    } finally {
-      _setLoading(false);
+      // Clear error after a short delay to not disrupt the UI
+      Future.delayed(const Duration(seconds: 3), () {
+        clearError();
+      });
     }
   }
 

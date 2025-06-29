@@ -3,6 +3,7 @@ import 'package:agrosmart/provider/cart_provider.dart';
 import 'package:agrosmart/provider/crop_detection_provider.dart';
 import 'package:agrosmart/provider/crop_prediction_provider.dart';
 import 'package:agrosmart/provider/disease_detection_provider.dart';
+import 'package:agrosmart/provider/market_products_provider.dart';
 import 'package:agrosmart/provider/weather_provider.dart';
 import 'package:agrosmart/screen/splash_screen.dart';
 import 'package:agrosmart/services/crop_diseases_service.dart';
@@ -26,6 +27,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => CropDetectionProvider(CropDetectionService.instance),
         ),
+        ChangeNotifierProvider(create: (_) => MarketProductsProvider()),
         ChangeNotifierProvider(create: (_) => CropPredictionProvider()),
         ChangeNotifierProvider(create: (_) => CartProvider()),
         ChangeNotifierProvider(

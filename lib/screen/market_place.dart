@@ -1,5 +1,8 @@
+import 'package:agrosmart/models/market_product_model.dart';
 import 'package:agrosmart/provider/cart_provider.dart';
+import 'package:agrosmart/repositories/market_product_repository.dart';
 import 'package:agrosmart/screen/cart_screen.dart';
+import 'package:agrosmart/services/session_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:agrosmart/models/crop_products.dart';
@@ -14,127 +17,81 @@ class MarketplaceScreen extends StatefulWidget {
 class _MarketplaceScreenState extends State<MarketplaceScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
+  List<MarketProductModel> _products = [];
+  List<MarketProductModel> _recommendations = [];
 
-  // Sample products data
-  final List<CropProduct> _products = [
-    CropProduct(
-      id: '1',
-      name: 'Rice',
-      description:
-          'High-quality rice grown in ideal conditions. Perfect for daily cooking.',
-      idealTemperature: '20°C - 35°C',
-      imageUrl: 'assets/images/rice.png',
-      suitability: 'High',
-      price: 45000,
-      seller: 'Thomas John',
-      location: 'Arusha',
-      date: '10/2/25',
-    ),
-    CropProduct(
-      id: '2',
-      name: 'Yellow Beans',
-      description: 'Nutritious yellow beans rich in protein and fiber.',
-      idealTemperature: '18°C - 30°C',
-      imageUrl: 'assets/images/beans.png',
-      suitability: 'Medium',
-      price: 45000,
-      seller: 'Thomas John',
-      location: 'Arusha',
-      date: '10/2/25',
-    ),
-    CropProduct(
-      id: '3',
-      name: 'Maize',
-      description:
-          'Fresh corn suitable for both human consumption and animal feed.',
-      idealTemperature: '20°C - 32°C',
-      imageUrl: 'assets/images/maize.png',
-      suitability: 'High',
-      price: 45000,
-      seller: 'Thomas John',
-      location: 'Arusha',
-      date: '10/2/25',
-    ),
-    CropProduct(
-      id: '4',
-      name: 'Wheat',
-      description:
-          'Premium wheat grains ideal for making flour and bread products.',
-      idealTemperature: '15°C - 25°C',
-      imageUrl: 'assets/images/wheat.png',
-      suitability: 'Medium',
-      price: 50000,
-      seller: 'Anna Makinda',
-      location: 'Dodoma',
-      date: '9/2/25',
-    ),
-    CropProduct(
-      id: '5',
-      name: 'Soybeans',
-      description:
-          'High-protein soybeans suitable for various food products and oil.',
-      idealTemperature: '20°C - 30°C',
-      imageUrl: 'assets/images/soybeans.png',
-      suitability: 'High',
-      price: 52000,
-      seller: 'Ibrahim Hassan',
-      location: 'Morogoro',
-      date: '11/2/25',
-    ),
-  ];
-
-  // Sample crop recommendations data
-  final List<CropRecommendation> _recommendations = [
-    CropRecommendation(
-      name: 'Soybeans',
-      description:
-          'Grows well in warm climates with well-drained soils. Nitrogen-fixing crop.',
-      idealTemperature: '20°C - 30°C',
-      imageUrl: 'assets/images/soybeans.png',
-      suitability: 'High',
-    ),
-    CropRecommendation(
-      name: 'Wheat',
-      description:
-          'Best in cool climates with moderate rainfall. Requires fertile soil.',
-      idealTemperature: '15°C - 25°C',
-      imageUrl: 'assets/images/wheat.png',
-      suitability: 'Medium',
-    ),
-    CropRecommendation(
-      name: 'Rice',
-      description:
-          'Thrives in flooded conditions. Requires abundant water and warm temperatures.',
-      idealTemperature: '20°C - 35°C',
-      imageUrl: 'assets/images/rice.png',
-      suitability: 'High',
-    ),
-    CropRecommendation(
-      name: 'Maize',
-      description:
-          'Versatile crop that grows in various conditions. Needs regular watering.',
-      idealTemperature: '20°C - 32°C',
-      imageUrl: 'assets/images/maize.png',
-      suitability: 'High',
-    ),
-  ];
-
-  List<CropProduct> get _filteredProducts {
-    if (_searchQuery.isEmpty) return _products;
-    return _products.where((product) {
-      return product.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-          product.description.toLowerCase().contains(
-            _searchQuery.toLowerCase(),
-          ) ||
-          product.seller.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-          product.location.toLowerCase().contains(_searchQuery.toLowerCase());
-    }).toList();
+  @override
+  void initState() {
+    _loadProducts();
+    _products = SessionManager.instance.products;
+    super.initState();
   }
 
   @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  void _loadProducts() async {
+    final product = await MarketProductRepository.instance.all;
+    _products = product;
+    _recommendations = product;
+    if (product.isNotEmpty) {
+      SessionManager.instance.setMarketProducts(product);
+    }
+  }
+
+  // // Sample products data
+  // final List<MarketProductModel> _products = [
+  // ];
+
+  // Sample crop recommendations data
+  // final List<CropRecommendation> _recommendations = [
+  //   CropRecommendation(
+  //     name: 'Soybeans',
+  //     description:
+  //         'Grows well in warm climates with well-drained soils. Nitrogen-fixing crop.',
+  //     idealTemperature: '20°C - 30°C',
+  //     imageUrl: 'assets/images/soybeans.png',
+  //     suitability: 'High',
+  //   ),
+  //   CropRecommendation(
+  //     name: 'Wheat',
+  //     description:
+  //         'Best in cool climates with moderate rainfall. Requires fertile soil.',
+  //     idealTemperature: '15°C - 25°C',
+  //     imageUrl: 'assets/images/wheat.png',
+  //     suitability: 'Medium',
+  //   ),
+  //   CropRecommendation(
+  //     name: 'Rice',
+  //     description:
+  //         'Thrives in flooded conditions. Requires abundant water and warm temperatures.',
+  //     idealTemperature: '20°C - 35°C',
+  //     imageUrl: 'assets/images/rice.png',
+  //     suitability: 'High',
+  //   ),
+  //   CropRecommendation(
+  //     name: 'Maize',
+  //     description:
+  //         'Versatile crop that grows in various conditions. Needs regular watering.',
+  //     idealTemperature: '20°C - 32°C',
+  //     imageUrl: 'assets/images/maize.png',
+  //     suitability: 'High',
+  //   ),
+  // ];
+
+  List<MarketProductModel> get _filteredProducts {
+    if (_searchQuery.isEmpty) return _products;
+    return _products.where((product) {
+      return product.name!.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+          product.description!.toLowerCase().contains(
+            _searchQuery.toLowerCase(),
+          ) ||
+          product.seller!.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+          product.location!.toLowerCase().contains(_searchQuery.toLowerCase());
+    }).toList();
   }
 
   @override
@@ -293,7 +250,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                                     ClipRRect(
                                       borderRadius: BorderRadius.circular(8.0),
                                       child: Image.asset(
-                                        product.imageUrl,
+                                        product.imageUrl!,
                                         width: 80,
                                         height: 80,
                                         fit: BoxFit.cover,
@@ -318,7 +275,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                                             CrossAxisAlignment.start,
                                         children: [
                                           Text(
-                                            product.name,
+                                            product.name!,
                                             style: const TextStyle(
                                               fontSize: 16,
                                               fontWeight: FontWeight.bold,
@@ -326,9 +283,9 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                                           ),
                                           const SizedBox(height: 4),
                                           Text(
-                                            product.description.length > 50
-                                                ? '${product.description.substring(0, 50)}...'
-                                                : product.description,
+                                            product.description!.length > 50
+                                                ? '${product.description!.substring(0, 50)}...'
+                                                : product.description!,
                                             style: TextStyle(
                                               color: Colors.grey.shade600,
                                               fontSize: 12,
@@ -344,7 +301,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                                               ),
                                               const SizedBox(width: 4),
                                               Text(
-                                                product.seller,
+                                                product.seller!,
                                                 style: TextStyle(
                                                   color: Colors.grey.shade600,
                                                   fontSize: 12,
@@ -358,7 +315,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                                               ),
                                               const SizedBox(width: 4),
                                               Text(
-                                                product.location,
+                                                product.location!,
                                                 style: TextStyle(
                                                   color: Colors.grey.shade600,
                                                   fontSize: 12,
@@ -372,7 +329,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                                                 CrossAxisAlignment.end,
                                             children: [
                                               Text(
-                                                'TZS ${product.price.toInt()}',
+                                                'TZS ${product.price}',
                                                 style: const TextStyle(
                                                   fontSize: 18,
                                                   fontWeight: FontWeight.bold,
@@ -381,7 +338,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                                               ),
                                               const Spacer(),
                                               Text(
-                                                product.date,
+                                                product.date!,
                                                 style: TextStyle(
                                                   color: Colors.grey.shade600,
                                                   fontSize: 12,
@@ -413,7 +370,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
     );
   }
 
-  void _showProductDetail(BuildContext context, CropProduct product) {
+  void _showProductDetail(BuildContext context, MarketProductModel product) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -441,7 +398,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                         topRight: Radius.circular(20),
                       ),
                       child: Image.asset(
-                        product.imageUrl,
+                        product.imageUrl!,
                         height: 200,
                         width: double.infinity,
                         fit: BoxFit.cover,
@@ -498,7 +455,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            product.name,
+                            product.name!,
                             style: const TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
@@ -511,7 +468,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                             ),
                             decoration: BoxDecoration(
                               color: _getSuitabilityColor(
-                                product.suitability,
+                                product.suitability!,
                               ).withOpacity(0.2),
                               borderRadius: BorderRadius.circular(16),
                             ),
@@ -519,7 +476,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                               'Suitability: ${product.suitability}',
                               style: TextStyle(
                                 color: _getSuitabilityColor(
-                                  product.suitability,
+                                  product.suitability!,
                                 ),
                                 fontWeight: FontWeight.bold,
                               ),
@@ -529,7 +486,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'TZS ${product.price.toInt()}',
+                        'TZS ${product.price}',
                         style: const TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
@@ -556,7 +513,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                               CircleAvatar(
                                 backgroundColor: Colors.green.shade100,
                                 child: Text(
-                                  product.seller[0],
+                                  product.seller![0],
                                   style: TextStyle(
                                     color: Colors.green.shade700,
                                     fontWeight: FontWeight.bold,
@@ -568,7 +525,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    product.seller,
+                                    product.seller!,
                                     style: const TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 16,
@@ -614,7 +571,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        product.description,
+                        product.description!,
                         style: TextStyle(
                           color: Colors.grey.shade800,
                           height: 1.5,
@@ -634,13 +591,13 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                       _buildInfoRow(
                         Icons.thermostat,
                         'Ideal Temperature',
-                        product.idealTemperature,
+                        product.idealTemperature!,
                       ),
                       const SizedBox(height: 8),
                       _buildInfoRow(
                         Icons.calendar_today,
                         'Listing Date',
-                        product.date,
+                        product.date!,
                       ),
                       const SizedBox(height: 30),
                     ],
@@ -852,14 +809,14 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
               ElevatedButton(
                 onPressed: () {
                   if (formKey.currentState!.validate()) {
-                    final newProduct = CropProduct(
-                      id: DateTime.now().millisecondsSinceEpoch.toString(),
+                    final newProduct = MarketProductModel(
+                      // id: DateTime.now().millisecondsSinceEpoch.toString(),
                       name: nameController.text,
                       description: descController.text,
                       idealTemperature: '20°C - 30°C',
                       imageUrl: 'assets/images/default_product.png',
                       suitability: 'High',
-                      price: double.parse(priceController.text),
+                      price: priceController.text,
                       seller: sellerController.text,
                       location: locationController.text,
                       date:
@@ -921,7 +878,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                                 ClipRRect(
                                   borderRadius: BorderRadius.circular(8),
                                   child: Image.asset(
-                                    crop.imageUrl,
+                                    crop.imageUrl!,
                                     width: 80,
                                     height: 80,
                                     fit: BoxFit.cover,
@@ -948,7 +905,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                                             MainAxisAlignment.spaceBetween,
                                         children: [
                                           Text(
-                                            crop.name,
+                                            crop.name!,
                                             style: const TextStyle(
                                               fontSize: 18,
                                               fontWeight: FontWeight.bold,
@@ -961,16 +918,16 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                                             ),
                                             decoration: BoxDecoration(
                                               color: _getSuitabilityColor(
-                                                crop.suitability,
+                                                crop.suitability!,
                                               ).withOpacity(0.2),
                                               borderRadius:
                                                   BorderRadius.circular(16),
                                             ),
                                             child: Text(
-                                              crop.suitability,
+                                              crop.suitability!,
                                               style: TextStyle(
                                                 color: _getSuitabilityColor(
-                                                  crop.suitability,
+                                                  crop.suitability!,
                                                 ),
                                                 fontWeight: FontWeight.bold,
                                                 fontSize: 12,
@@ -989,7 +946,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                                           ),
                                           const SizedBox(width: 4),
                                           Text(
-                                            crop.idealTemperature,
+                                            crop.idealTemperature!,
                                             style: TextStyle(
                                               color: Colors.grey.shade700,
                                               fontSize: 12,
@@ -1004,7 +961,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                             ),
                             const SizedBox(height: 16),
                             Text(
-                              crop.description,
+                              crop.description!,
                               style: TextStyle(
                                 color: Colors.grey.shade800,
                                 height: 1.4,
@@ -1017,8 +974,8 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                                 onPressed: () {
                                   Navigator.pop(context);
                                   setState(() {
-                                    _searchController.text = crop.name;
-                                    _searchQuery = crop.name;
+                                    _searchController.text = crop.name!;
+                                    _searchQuery = crop.name!;
                                   });
                                 },
                                 style: ElevatedButton.styleFrom(
